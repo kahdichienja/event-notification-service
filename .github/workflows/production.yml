@@ -1,0 +1,64 @@
+name: Production Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY_IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        run: yarn lint
+      - name: Test
+        run: yarn test
+
+  build-and-push:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY_IMAGE }}:latest
+            ${{ env.REGISTRY_IMAGE }}:main-${{ github.sha }}
+
+  # Documenting deployment parameters to demonstrate GitHub Variables and Secrets usage
+  echo-deploy-params:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Verify Environment Configuration
+        run: |
+          echo "Simulated Deploy Script:"
+          echo "export APP_ENV=${{ vars.APP_ENV }}"
+          echo "export CACHE_TTL_SECONDS=${{ vars.CACHE_TTL_SECONDS }}"
+          echo "docker compose pull && docker compose up -d"

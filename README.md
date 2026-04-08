@@ -1,98 +1,91 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Event Notification Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A small Event Notification Service built using NestJS, fully containerized with Docker, and running behind an Nginx reverse proxy. It uses Redis for caching and Pub/Sub.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Local Setup
 
-## Description
+1. Create a `.env` file from the example (optional, Docker Compose defaults map smoothly):
+   ```bash
+   cp .env.example .env
+   ```
+   
+2. Start the services using Docker Compose:
+   ```bash
+   docker-compose up --build -d
+   ```
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The application and Nginx reverse proxy will start on port `80` with the `api` prefix.
 
-## Project setup
+## API Usage
 
-```bash
-$ yarn install
+### Create and Publish an Event
+
+**Endpoint:** `POST /api/events`
+
+**Request Body:**
+```json
+{
+  "type": "user_signup",
+  "payload": {
+    "userId": "123",
+    "email": "user@example.com"
+  }
+}
 ```
 
-## Compile and run the project
-
+**Curl Example:**
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+curl -X POST http://localhost/api/events \
+  -H 'Content-Type: application/json' \
+  -d '{"type":"user_signup","payload":{"userId":"123","email":"user@example.com"}}'
 ```
 
-## Run tests
+### Retrieve an Event
 
+**Endpoint:** `GET /api/events/:id`
+
+**Curl Example:**
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+curl http://localhost/api/events/YOUR_EVENT_ID
 ```
 
-## Deployment
+### Health Check
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+**Endpoint:** `GET /api/health`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+**Curl Example:**
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+curl http://localhost/api/health
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Architecture & Trade-offs
 
-## Resources
+- **NestJS Structure:** The app is structured modularly. A dedicated `EventsModule` handles API logic, while a separate `RedisModule` wraps `ioredis` publisher and subscriber interactions.
+- **Redis Connections:** As per requirements, two distinct `ioredis` clients are instantiated, one for subscriber functions (listening to `events:created`), and one for publishing events as well as cache interactions (`set`/`get`).
+- **Nginx Proxy:** The application doesn't expose its port on the host directly. Instead, traffic routes through Nginx acting as a reverse proxy, dropping irrelevant requests and forwarding correct headers (`X-Real-IP`).
+- **Storage Strategy:** Under the hood, the service utilizes a transient in-memory store for saving events. Redis operates as a cache-aside layer configured with TTL defined via the environment context.
 
-Check out a few resources that may come in handy when working with NestJS:
+## Production Deployment Actions
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The GitHub Actions are configured to automate builds and deployments. On push to `main`, the pipeline tags and pushes the Docker image to the GitHub Container Registry. 
 
-## Support
+**Simulated Deploy Step Details:**
+To execute standard deployment steps on a live server, the process simulates the following:
+```bash
+# Pull the latest Docker images tagged from the Container Registry
+docker-compose pull
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Run the services using the specified environment variables from GitHub environments
+export APP_ENV=production
+export CACHE_TTL_SECONDS=120
 
-## Stay in touch
+# Restart the proxy and application with daemon mode
+docker-compose up -d
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## Future Enhancements
+Given more time, we could add:
+- Persistent Database (Postgres or MongoDB) instead of an in-memory Map
+- Event validations and schemas utilizing class-validator customized DTOs more extensively
+- Integration with external metrics or logging architectures (e.g. Prometheus, Winston, ELK)
+- Comprehensive test coverage with unit/e2e tests asserting Pub/Sub interactions relying perhaps on a local Redis mock
