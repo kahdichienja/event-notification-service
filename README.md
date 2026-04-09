@@ -70,9 +70,13 @@ curl http://localhost/api/health
 The GitHub Actions are configured to automate builds and deployments. On push to `main`, the pipeline tags and pushes the Docker image to the GitHub Container Registry. 
 
 **Simulated Deploy Step Details:**
-To execute standard deployment steps on a live server, the process simulates the following:
+To execute standard deployment steps on a live server, the process simulates the following. You can pull the image directly from the GitHub Container Registry:
+
 ```bash
-# Pull the latest Docker images tagged from the Container Registry
+# Pull the exact image explicitly:
+docker pull ghcr.io/kahdichienja/event-notification-service:latest
+
+# Or if updating via Docker Compose:
 docker-compose pull
 
 # Run the services using the specified environment variables from GitHub environments
