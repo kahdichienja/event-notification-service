@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 const request = require('supertest');
@@ -16,10 +17,12 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api');
-    app.useGlobalPipes(new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-    }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
   });
 
@@ -40,13 +43,13 @@ describe('AppController (e2e)', () => {
       .post('/api/events')
       .send({ type: 'integration', payload: { foo: 'bar' } })
       .expect(201);
-      
+
     const createdId = postRes.body.id;
     expect(createdId).toBeDefined();
     expect(postRes.body.type).toBe('integration');
 
     // Allow mock pub/sub events to process
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise((r) => setTimeout(r, 100));
 
     // 2. Fetch the event
     const getRes = await request(app.getHttpServer())

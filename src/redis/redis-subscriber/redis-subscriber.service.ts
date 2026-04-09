@@ -24,12 +24,14 @@ export class RedisSubscriberService implements OnModuleInit, OnModuleDestroy {
 
     this.subscriber.on('message', (channel, message) => {
       if (channel === 'events:created') {
-        process.stdout.write(`[RedisSubscriberService] Received message on events:created: ${message}\n`);
+        process.stdout.write(
+          `[RedisSubscriberService] Received message on events:created: ${message}\n`,
+        );
       }
     });
   }
 
   onModuleDestroy() {
-    this.subscriber.quit();
+    this.subscriber.quit().catch(console.error);
   }
 }
