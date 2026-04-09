@@ -99,4 +99,4 @@ Given more time, we could add:
 - Persistent Database (Postgres or MongoDB) instead of an in-memory Map
 - Event validations and schemas utilizing class-validator customized DTOs more extensively
 - Integration with external metrics or logging architectures (e.g. Prometheus, Winston, ELK)
-- Comprehensive test coverage with unit/e2e tests asserting Pub/Sub interactions relying perhaps on a local Redis mock
+ 
