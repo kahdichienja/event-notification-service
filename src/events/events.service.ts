@@ -47,7 +47,8 @@ export class EventsService {
     }
 
     // 3. Cache it
-    const ttl = this.configService.get<number>('CACHE_TTL_SECONDS', 60);
+    // parseInt ensures a real number at runtime — ConfigService.get<number> only annotates the type, it does not coerce env var strings
+    const ttl = parseInt(this.configService.get('CACHE_TTL_SECONDS', '60'), 10);
     await this.redisPublisher.setCache(
       `event:${id}`,
       JSON.stringify(event),
