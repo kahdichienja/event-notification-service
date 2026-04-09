@@ -87,6 +87,9 @@ export CACHE_TTL_SECONDS=120
 docker-compose up -d
 ```
 ## One Click deployment
+
+![Quick Deploy Screenshot](docs/Screenshot.png)
+
 Use this script to pull the latest image and run the services:
 ```
 git clone https://github.com/kahdichienja/event-notification-service.git

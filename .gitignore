@@ -41,5 +41,4 @@ lerna-debug.log*
 .docker
 
 # Docs
-docs/
 docker-compose.override.yml
