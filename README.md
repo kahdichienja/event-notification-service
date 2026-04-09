@@ -89,6 +89,8 @@ docker-compose up -d
 ## One Click deployment
 Use this script to pull the latest image and run the services:
 ```
+git clone https://github.com/kahdichienja/event-notification-service.git
+cd event-notification-service
 chmod +x pull-and-test.sh
 ./pull-and-test.sh
 ```
