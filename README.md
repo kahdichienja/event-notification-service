@@ -86,10 +86,17 @@ export CACHE_TTL_SECONDS=120
 # Restart the proxy and application with daemon mode
 docker-compose up -d
 ```
+## One Click deployment
+Use this script to pull the latest image and run the services:
+```
+chmod +x pull-and-test.sh
+./pull-and-test.sh
+```
+
 
 ## Future Enhancements
 Given more time, we could add:
 - Persistent Database (Postgres or MongoDB) instead of an in-memory Map
 - Event validations and schemas utilizing class-validator customized DTOs more extensively
 - Integration with external metrics or logging architectures (e.g. Prometheus, Winston, ELK)
-- Comprehensive test coverage with unit/e2e tests asserting Pub/Sub interactions relying perhaps on a local Redis mock
+ 

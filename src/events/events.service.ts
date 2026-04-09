@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { EventsStore, AppEvent } from './events.store';
 import { CreateEventDto } from './dto/create-event.dto';
 import { RedisPublisherService } from '../redis/redis-publisher/redis-publisher.service';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class EventsService {
@@ -15,7 +15,7 @@ export class EventsService {
 
   async createEvent(createEventDto: CreateEventDto): Promise<AppEvent> {
     const event: AppEvent = {
-      id: uuidv4(),
+      id: randomUUID(),
       type: createEventDto.type,
       payload: createEventDto.payload,
       createdAt: new Date().toISOString(),
