@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -f .env ]; then
+  echo "📄 Automatically staging .env file from .env.example..."
+  cp .env.example .env
+fi
+
 echo "🚀 Pulling the latest image explicitly from GitHub Container Registry..."
 docker pull ghcr.io/kahdichienja/event-notification-service:latest
 
