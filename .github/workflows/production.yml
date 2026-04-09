@@ -50,7 +50,7 @@ jobs:
             ${{ env.REGISTRY_IMAGE }}:latest
             ${{ env.REGISTRY_IMAGE }}:main-${{ github.sha }}
 
-  # Documenting deployment parameters to demonstrate GitHub Variables and Secrets usage
+  # Deployment parameters to demonstrate GitHub Variables and Secrets
   echo-deploy-params:
     needs: build-and-push
     runs-on: ubuntu-latest
