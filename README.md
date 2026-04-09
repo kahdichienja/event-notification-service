@@ -86,6 +86,13 @@ export CACHE_TTL_SECONDS=120
 # Restart the proxy and application with daemon mode
 docker-compose up -d
 ```
+## One Click deployment
+Use this script to pull the latest image and run the services:
+```
+chmod +x pull-and-test.sh
+./pull-and-test.sh
+```
+
 
 ## Future Enhancements
 Given more time, we could add:
