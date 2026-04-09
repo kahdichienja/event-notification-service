@@ -8,6 +8,6 @@ import { RedisModule } from '../redis/redis.module';
 @Module({
   imports: [ConfigModule, RedisModule],
   controllers: [EventsController],
-  providers: [EventsService, EventsStore]
+  providers: [EventsService, EventsStore],
 })
 export class EventsModule {}

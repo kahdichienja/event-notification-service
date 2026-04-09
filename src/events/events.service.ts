@@ -48,7 +48,11 @@ export class EventsService {
 
     // 3. Cache it
     const ttl = this.configService.get<number>('CACHE_TTL_SECONDS', 60);
-    await this.redisPublisher.setCache(`event:${id}`, JSON.stringify(event), ttl);
+    await this.redisPublisher.setCache(
+      `event:${id}`,
+      JSON.stringify(event),
+      ttl,
+    );
 
     return event;
   }

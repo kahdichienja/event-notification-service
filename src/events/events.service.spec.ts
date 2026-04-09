@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { EventsService } from './events.service';
@@ -44,7 +45,7 @@ describe('EventsService', () => {
     it('should save to store and publish to redis', async () => {
       const storeSpy = jest.spyOn(store, 'save');
       const eventDto = { type: 'test', payload: { a: 1 } };
-      
+
       const result = await service.createEvent(eventDto);
 
       expect(result.id).toBeDefined();
@@ -59,12 +60,19 @@ describe('EventsService', () => {
 
   describe('getEvent', () => {
     it('should return from cache if present', async () => {
-      const cachedEvent = { id: 'uuid-1', type: 'test', payload: {}, createdAt: 'date' };
-      (redisPublisher.getCache as jest.Mock).mockResolvedValue(JSON.stringify(cachedEvent));
+      const cachedEvent = {
+        id: 'uuid-1',
+        type: 'test',
+        payload: {},
+        createdAt: 'date',
+      };
+      (redisPublisher.getCache as jest.Mock).mockResolvedValue(
+        JSON.stringify(cachedEvent),
+      );
 
       const result = await service.getEvent('uuid-1');
       expect(result).toEqual(cachedEvent);
-      
+
       // Validate store wasn't called
       const storeSpy = jest.spyOn(store, 'findById');
       expect(storeSpy).not.toHaveBeenCalled();
@@ -72,7 +80,12 @@ describe('EventsService', () => {
 
     it('should return from store and cache it if not in cache', async () => {
       (redisPublisher.getCache as jest.Mock).mockResolvedValue(null);
-      const storedEvent = { id: 'uuid-2', type: 'test', payload: {}, createdAt: 'date' };
+      const storedEvent = {
+        id: 'uuid-2',
+        type: 'test',
+        payload: {},
+        createdAt: 'date',
+      };
       store.save(storedEvent); // Prefill store
 
       const result = await service.getEvent('uuid-2');
@@ -86,8 +99,10 @@ describe('EventsService', () => {
 
     it('should throw NotFoundException if missing from cache and store', async () => {
       (redisPublisher.getCache as jest.Mock).mockResolvedValue(null);
-      
-      await expect(service.getEvent('invalid-id')).rejects.toThrow(NotFoundException);
+
+      await expect(service.getEvent('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

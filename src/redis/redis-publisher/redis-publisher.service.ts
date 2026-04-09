@@ -16,7 +16,7 @@ export class RedisPublisherService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
-    this.client.quit();
+    this.client.quit().catch(console.error);
   }
 
   async publishMessage(channel: string, message: string) {
